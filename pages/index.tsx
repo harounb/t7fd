@@ -1,11 +1,63 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
-import styles from '../styles/Home.module.css'
+import Head from "next/head";
+import Image from "next/image";
+import { Inter } from "@next/font/google";
+import styles from "../styles/Home.module.css";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
-export default function Home() {
+
+type RawGithubMove = {
+  Alias: string[];
+  "Block frame": string;
+  Command: string;
+  "Counter hit frame": string;
+  Damage: string;
+  Gif: string;
+  "Hit frame": string;
+  "Hit level": string;
+  Notes: string;
+  "Start up frame": string;
+  Tags: string[];
+};
+
+type Move = {
+  alias: string[];
+  blockFrame: string;
+  command: string;
+  damage: string;
+  gif: string;
+  hitFrame: string;
+  hitLevel: string;
+  notes: string;
+  startUpFrame: string;
+  tags: string[]
+}
+
+const rawGithubMoveToMove = (rawGithubMove: RawGithubMove) : Move => ({
+  alias: rawGithubMove.Alias,
+  blockFrame: rawGithubMove["Block frame"],
+  command: rawGithubMove.Command,
+  damage: rawGithubMove.Damage,
+  gif: rawGithubMove.Gif,
+  hitFrame: rawGithubMove["Hit frame"],
+  hitLevel: rawGithubMove["Hit level"],
+  notes: rawGithubMove.Notes,
+  startUpFrame: rawGithubMove["Start up frame"],
+  tags: rawGithubMove.Tags
+});
+
+
+export async function getServerSideProps() {
+  const response = await fetch(
+    "https://raw.githubusercontent.com/harounb/mokujin/master/json/hwoarang.json"
+  );
+  const data = await response.json();
+
+  // Pass data to the page via props
+  return { props: { data: JSON.parse(JSON.stringify(data.map(rawGithubMoveToMove))) } };
+}
+
+export default function Home({ data }: { data: Move[] }) {
   return (
     <>
       <Head>
@@ -19,6 +71,7 @@ export default function Home() {
           <p>
             Get started by editing&nbsp;
             <code className={styles.code}>pages/index.tsx</code>
+            {/* {JSON.stringify(data)} */}
           </p>
           <div>
             <a
@@ -26,7 +79,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              By{' '}
+              By{" "}
               <Image
                 src="/vercel.svg"
                 alt="Vercel Logo"
@@ -39,6 +92,33 @@ export default function Home() {
           </div>
         </div>
 
+        <table>
+          <thead>
+          <tr>
+            <th>Command</th>
+            <th>Hit level</th>
+            <th>Damage</th>
+            <th>Start up</th>
+            <th>Block frame</th>
+            <th>Hit frame</th>
+            <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((move) => {
+              return (<tr key={JSON.stringify(move)}>
+                <td>{move.command}</td>
+                <td>{move.hitLevel}</td>
+                <td>{move.damage}</td>
+                <td>{move.startUpFrame}</td>
+                <td>{move.blockFrame}</td>
+                <td>{move.hitFrame}</td>
+                <td>{move.notes}</td>
+                {/* I think I got blocked from gfycat cos of this line <td>{move.gif && <img src={move.gif} /> }</td> */}
+              </tr>)
+            })}
+            </tbody>
+          </table>
         <div className={styles.center}>
           <Image
             className={styles.logo}
@@ -119,5 +199,5 @@ export default function Home() {
         </div>
       </main>
     </>
-  )
+  );
 }
