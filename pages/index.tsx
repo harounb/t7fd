@@ -1,10 +1,9 @@
+import {useState} from "react";
 import Head from "next/head";
 import Image from "next/image";
-import { Inter } from "@next/font/google";
-import styles from "../styles/Home.module.css";
+import { Source_Code_Pro } from "@next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
-
+const sourceCodePro = Source_Code_Pro({ subsets: ["latin"] });
 
 type RawGithubMove = {
   Alias: string[];
@@ -30,10 +29,10 @@ type Move = {
   hitLevel: string;
   notes: string;
   startUpFrame: string;
-  tags: string[]
-}
+  tags: string[];
+};
 
-const rawGithubMoveToMove = (rawGithubMove: RawGithubMove) : Move => ({
+const rawGithubMoveToMove = (rawGithubMove: RawGithubMove): Move => ({
   alias: rawGithubMove.Alias,
   blockFrame: rawGithubMove["Block frame"],
   command: rawGithubMove.Command,
@@ -43,9 +42,8 @@ const rawGithubMoveToMove = (rawGithubMove: RawGithubMove) : Move => ({
   hitLevel: rawGithubMove["Hit level"],
   notes: rawGithubMove.Notes,
   startUpFrame: rawGithubMove["Start up frame"],
-  tags: rawGithubMove.Tags
+  tags: rawGithubMove.Tags,
 });
-
 
 export async function getServerSideProps() {
   const response = await fetch(
@@ -54,10 +52,61 @@ export async function getServerSideProps() {
   const data = await response.json();
 
   // Pass data to the page via props
-  return { props: { data: JSON.parse(JSON.stringify(data.map(rawGithubMoveToMove))) } };
+  return {
+    props: { data: JSON.parse(JSON.stringify(data.map(rawGithubMoveToMove))) },
+  };
 }
 
+const Column: Record<string, keyof Move> = {
+  ALIAS: "alias",
+  BLOCK_FRAME: "blockFrame",
+  COMMAND: "command",
+  DAMAGE: "damage",
+  GIF: "gif",
+  HIT_FRAME: "hitFrame",
+  HIT_LEVEL: "hitLevel",
+  NOTES: "notes",
+  START_UP_FRAME: "startUpFrame",
+  TAGS: "tags"
+}
+
+const ColumnDisplayName = {
+  [Column.ALIAS]: "Alias",
+  [Column.BLOCK_FRAME]: "Block frame",
+  [Column.COMMAND]: "Command",
+  [Column.DAMAGE]: "Damage",
+  [Column.GIF]: "Gif",
+  [Column.HIT_FRAME]: "Hit frame",
+  [Column.HIT_LEVEL]: "Hit level",
+  [Column.NOTES]: "Notes",
+  [Column.START_UP_FRAME]: "Start up",
+  [Column.TAGS]: "Tags"
+}
+
+const columnOrder = [Column.COMMAND, Column.HIT_LEVEL, Column.DAMAGE, Column.START_UP_FRAME, Column.BLOCK_FRAME, Column.HIT_FRAME, Column.NOTES ];
+
+const defaultDisplayedColumns = [Column.COMMAND, Column.START_UP_FRAME, Column.BLOCK_FRAME, Column.HIT_FRAME]
+
 export default function Home({ data }: { data: Move[] }) {
+  const [displayedColumns, setDisplayedColumns] = useState(defaultDisplayedColumns);
+  const createHandleChange = (columnKey: keyof Move) => () => {
+    if(displayedColumns.find(displayedColumnKey => displayedColumnKey === columnKey)) {
+      setDisplayedColumns(displayedColumns.filter(displayedColumns => displayedColumns !== columnKey));
+    } else {
+      setDisplayedColumns([...displayedColumns, columnKey])
+  }
+  }
+
+  const isColumnKey = (key: string) : key is keyof Move => {
+    return Object.values(Column).some((columnKey) => columnKey === key);
+  }
+  const columnIsDisplayed = (column: string) : boolean => {
+    if(!isColumnKey(column)) {
+      return false;
+    }
+    return displayedColumns.some(displayedColumns => displayedColumns === column)
+  }
+
   return (
     <>
       <Head>
@@ -66,138 +115,46 @@ export default function Home({ data }: { data: Move[] }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>pages/index.tsx</code>
-            {/* {JSON.stringify(data)} */}
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{" "}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
-
-        <table>
-          <thead>
-          <tr>
-            <th>Command</th>
-            <th>Hit level</th>
-            <th>Damage</th>
-            <th>Start up</th>
-            <th>Block frame</th>
-            <th>Hit frame</th>
-            <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((move) => {
-              return (<tr key={JSON.stringify(move)}>
-                <td>{move.command}</td>
-                <td>{move.hitLevel}</td>
-                <td>{move.damage}</td>
-                <td>{move.startUpFrame}</td>
-                <td>{move.blockFrame}</td>
-                <td>{move.hitFrame}</td>
-                <td>{move.notes}</td>
-                {/* I think I got blocked from gfycat cos of this line <td>{move.gif && <img src={move.gif} /> }</td> */}
-              </tr>)
-            })}
+      <div className={`${sourceCodePro.className} flex text-stone-50 bg-gray-800`}>
+        <aside className="w-80 p-4 shrink-0">
+          <h1 className="text-2xl pb-2 font-bold">Tekken 7 Frame Data</h1>
+          <h2 className="text-xl pb-8">Hwoarang</h2>
+          <fieldset>
+            <legend>Columns</legend>
+            {columnOrder.map((column) => (<div key={column}>
+              <input type="checkbox" id={`column-${column}`} name={`column-${column}`} checked={columnIsDisplayed(column)} onChange={createHandleChange(column)}/>
+              <label htmlFor={`column-${column}`}>{ColumnDisplayName[column]}</label>
+            </div>))}
+          </fieldset>
+        </aside>
+        <main className="max-h-screen overflow-scroll pt-4">
+          <table>
+            <thead>
+              <tr>
+                {columnOrder.filter(columnIsDisplayed).map((columnKey) => (<th className="p-2" key={columnKey}>{ColumnDisplayName[columnKey]}</th>))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((move, index) => {
+                const moveKeys = Object.keys(move).filter(isColumnKey);
+                return (
+                  <tr
+                    className={`${
+                      index % 2 === 0 ? "bg-gray-700" : "bg-gray-600"
+                    } hover:bg-gray-400`}
+                    key={JSON.stringify(move)}
+                  >
+                    {columnOrder.filter(columnIsDisplayed).map((moveKey) => 
+                      <td className="p-2" key={`move-${move.command}-key-${moveKey}`}>{move[moveKey]}</td>
+                    )}
+                    {/* I think I got blocked from gfycat cos of this line <td>{move.gif && <img src={move.gif} /> }</td> */}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
-            />
-          </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+        </main>
+      </div>
     </>
   );
 }
