@@ -8,6 +8,7 @@ specifiers:
   autoprefixer: ^10.4.13
   eslint: 8.31.0
   eslint-config-next: 13.1.1
+  mokujin: github:harounb/mokujin#npm-package
   next: 13.1.1
   postcss: ^8.4.21
   react: 18.2.0
@@ -22,6 +23,7 @@ dependencies:
   '@types/react-dom': 18.0.10
   eslint: 8.31.0
   eslint-config-next: 13.1.1_iukboom6ndih5an6iafl45j2fe
+  mokujin: github.com/harounb/mokujin/f8be22096fbc2f00ea74653dfd69d25727c5e23b
   next: 13.1.1_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -2381,4 +2383,10 @@ packages:
   /yocto-queue/0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+    dev: false
+
+  github.com/harounb/mokujin/f8be22096fbc2f00ea74653dfd69d25727c5e23b:
+    resolution: {tarball: https://codeload.github.com/harounb/mokujin/tar.gz/f8be22096fbc2f00ea74653dfd69d25727c5e23b}
+    name: mokujin
+    version: 1.0.0
     dev: false
