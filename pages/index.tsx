@@ -1,3 +1,10 @@
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+
 export default () => {
-    return null;
-}
+  const { push } = useRouter();
+  useEffect(() => {
+    push("/t7/fd/!generic");
+  }, []);
+  return null;
+};

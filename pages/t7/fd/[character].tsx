@@ -1,7 +1,6 @@
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
-import { GetServerSideProps } from 'next';
+import { GetStaticProps } from 'next';
 import Head from "next/head";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import Link from 'next/link'
 import { Source_Code_Pro } from "@next/font/google";
@@ -51,13 +50,8 @@ const rawGithubMoveToMove = (rawGithubMove: RawGithubMove): Move => ({
 
 const jsonBaseUrl = "https://raw.githubusercontent.com/harounb/mokujin/master/json/";
 
-export const getServerSideProps: GetServerSideProps<{[key: string]: any}, {[key: string]: any}> = async (context) => {
-  const {params, res} = context;
-  
-  res.setHeader(
-    'Cache-Control',
-    'public, s-maxage=10, stale-while-revalidate=59'
-  )
+export const getStaticProps: GetStaticProps<{[key: string]: any}, {[key: string]: any}> = async (context) => {
+  const {params } = context;
 
   if(params === undefined) {
     return {props: {}};
@@ -73,6 +67,8 @@ export const getServerSideProps: GetServerSideProps<{[key: string]: any}, {[key:
     props: { data: JSON.parse(JSON.stringify(data.map(rawGithubMoveToMove))) },
   };
 }
+
+export const getStaticPaths = () => ({fallback: false, paths: characters.map((character) => ({params: {character}}))})
 
 const orderedColumns = [
   "command",
@@ -262,7 +258,7 @@ export default function Home({ data }: { data: Move[] }) {
               onChange={handleSearchChange}
             />
 
-            <button className="pl-2 border border-gray-600 pointer" type="submit">
+            <button className="pl-2 pointer" type="submit">
               <span className="sr-only">Submit Search</span>
               <SearchIcon />
             </button>
