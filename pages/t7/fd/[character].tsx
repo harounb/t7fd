@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Source_Code_Pro } from "@next/font/google";
 import SearchIcon from "../../../component/icons/search";
 import useDebounce from "../../../hook/useDebounce";
-const sourceCodePro = Source_Code_Pro({ subsets: ["latin"] });
 
 type RawGithubMove = {
   Alias?: string[];
@@ -232,7 +231,7 @@ export default function Home({ data }: { data: Move[] }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div
-        className={`${sourceCodePro.className} min-h-screen flex text-stone-50 bg-gray-800`}
+        className="font-mono min-h-screen flex text-stone-50 bg-gray-800"
       >
         <aside className="max-h-screen overflow-scroll w-80 p-4 shrink-0">
           <h1 className="text-3xl pb-2 font-bold">
