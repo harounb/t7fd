@@ -1,6 +1,7 @@
-import {useState} from "react";
+import { useState, FormEvent } from "react";
 import Head from "next/head";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { Source_Code_Pro } from "@next/font/google";
 
 const sourceCodePro = Source_Code_Pro({ subsets: ["latin"] });
@@ -67,8 +68,8 @@ const Column: Record<string, keyof Move> = {
   HIT_LEVEL: "hitLevel",
   NOTES: "notes",
   START_UP_FRAME: "startUpFrame",
-  TAGS: "tags"
-}
+  TAGS: "tags",
+};
 
 const ColumnDisplayName = {
   [Column.ALIAS]: "Alias",
@@ -80,32 +81,76 @@ const ColumnDisplayName = {
   [Column.HIT_LEVEL]: "Hit level",
   [Column.NOTES]: "Notes",
   [Column.START_UP_FRAME]: "Start up",
-  [Column.TAGS]: "Tags"
-}
+  [Column.TAGS]: "Tags",
+};
 
-const columnOrder = [Column.COMMAND, Column.HIT_LEVEL, Column.DAMAGE, Column.START_UP_FRAME, Column.BLOCK_FRAME, Column.HIT_FRAME, Column.NOTES ];
+const columnOrder = [
+  Column.COMMAND,
+  Column.HIT_LEVEL,
+  Column.DAMAGE,
+  Column.START_UP_FRAME,
+  Column.BLOCK_FRAME,
+  Column.HIT_FRAME,
+  Column.NOTES,
+];
 
-const defaultDisplayedColumns = [Column.COMMAND, Column.START_UP_FRAME, Column.BLOCK_FRAME, Column.HIT_FRAME]
+const defaultDisplayedColumns = [
+  Column.COMMAND,
+  Column.START_UP_FRAME,
+  Column.BLOCK_FRAME,
+  Column.HIT_FRAME,
+];
+
+const formDataToURLSearchParams = (formData: FormData): URLSearchParams =>
+  new URLSearchParams(
+    Array.from(
+      formData.entries(),
+      ([key, formDataEntryValue]: [string, FormDataEntryValue]): string[] => [
+        key,
+        formDataEntryValue.toString(),
+      ]
+    )
+  );
 
 export default function Home({ data }: { data: Move[] }) {
-  const [displayedColumns, setDisplayedColumns] = useState(defaultDisplayedColumns);
-  const createHandleChange = (columnKey: keyof Move) => () => {
-    if(displayedColumns.find(displayedColumnKey => displayedColumnKey === columnKey)) {
-      setDisplayedColumns(displayedColumns.filter(displayedColumns => displayedColumns !== columnKey));
-    } else {
-      setDisplayedColumns([...displayedColumns, columnKey])
-  }
-  }
+  const [displayedColumns, setDisplayedColumns] = useState(
+    defaultDisplayedColumns
+  );
+  const router = useRouter();
+  const { search } = router.query;
 
-  const isColumnKey = (key: string) : key is keyof Move => {
+  const searchFilteredMoves =
+    typeof search === "string"
+      ? data.filter((move) => move.command.startsWith(search))
+      : data;
+
+  const createHandleChange = (columnKey: keyof Move) => () => {
+    if (
+      displayedColumns.find(
+        (displayedColumnKey) => displayedColumnKey === columnKey
+      )
+    ) {
+      setDisplayedColumns(
+        displayedColumns.filter(
+          (displayedColumns) => displayedColumns !== columnKey
+        )
+      );
+    } else {
+      setDisplayedColumns([...displayedColumns, columnKey]);
+    }
+  };
+
+  const isColumnKey = (key: string): key is keyof Move => {
     return Object.values(Column).some((columnKey) => columnKey === key);
-  }
-  const columnIsDisplayed = (column: string) : boolean => {
-    if(!isColumnKey(column)) {
+  };
+  const columnIsDisplayed = (column: string): boolean => {
+    if (!isColumnKey(column)) {
       return false;
     }
-    return displayedColumns.some(displayedColumns => displayedColumns === column)
-  }
+    return displayedColumns.some(
+      (displayedColumns) => displayedColumns === column
+    );
+  };
 
   return (
     <>
@@ -115,27 +160,72 @@ export default function Home({ data }: { data: Move[] }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className={`${sourceCodePro.className} flex text-stone-50 bg-gray-800`}>
+      <div
+        className={`${sourceCodePro.className} min-h-screen flex text-stone-50 bg-gray-800`}
+      >
         <aside className="w-80 p-4 shrink-0">
-          <h1 className="text-2xl pb-2 font-bold">Tekken 7 Frame Data</h1>
-          <h2 className="text-xl pb-8">Hwoarang</h2>
+          <h1 className="text-3xl pb-2 font-bold">
+            Tekken 7 <br /> Frame Data
+          </h1>
+          <h2 className="text-2xl pb-8">Hwoarang</h2>
+          <form
+            role="search"
+            action="/"
+            method="get"
+            onSubmit={(event: FormEvent<HTMLFormElement>) => {
+              event.preventDefault();
+              const params = formDataToURLSearchParams(
+                new FormData(event.currentTarget)
+              );
+              router.push(`/?${params.toString()}`);
+            }}
+          >
+            <label htmlFor="header-search">
+              <span>Search</span>
+            </label>
+
+            <input
+              className="bg-gray-800 border border-gray-600"
+              type="text"
+              id="header-search"
+              name="search"
+            />
+
+            <button type="submit">
+              <span>Submit Search</span>
+            </button>
+          </form>
           <fieldset>
-            <legend>Columns</legend>
-            {columnOrder.map((column) => (<div key={column}>
-              <input type="checkbox" id={`column-${column}`} name={`column-${column}`} checked={columnIsDisplayed(column)} onChange={createHandleChange(column)}/>
-              <label htmlFor={`column-${column}`}>{ColumnDisplayName[column]}</label>
-            </div>))}
+            <legend className="font-bold text-lg pb-1">Columns</legend>
+            {columnOrder.map((column) => (
+              <div key={column}>
+                <input
+                  type="checkbox"
+                  id={`column-${column}`}
+                  name={`column-${column}`}
+                  checked={columnIsDisplayed(column)}
+                  onChange={createHandleChange(column)}
+                />
+                <label htmlFor={`column-${column}`}>
+                  {ColumnDisplayName[column]}
+                </label>
+              </div>
+            ))}
           </fieldset>
         </aside>
         <main className="max-h-screen overflow-scroll pt-4">
           <table>
             <thead>
               <tr>
-                {columnOrder.filter(columnIsDisplayed).map((columnKey) => (<th className="p-2" key={columnKey}>{ColumnDisplayName[columnKey]}</th>))}
+                {columnOrder.filter(columnIsDisplayed).map((columnKey) => (
+                  <th className="p-2" key={columnKey}>
+                    {ColumnDisplayName[columnKey]}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {data.map((move, index) => {
+              {searchFilteredMoves.map((move, index) => {
                 const moveKeys = Object.keys(move).filter(isColumnKey);
                 return (
                   <tr
@@ -144,9 +234,14 @@ export default function Home({ data }: { data: Move[] }) {
                     } hover:bg-gray-400`}
                     key={JSON.stringify(move)}
                   >
-                    {columnOrder.filter(columnIsDisplayed).map((moveKey) => 
-                      <td className="p-2" key={`move-${move.command}-key-${moveKey}`}>{move[moveKey]}</td>
-                    )}
+                    {columnOrder.filter(columnIsDisplayed).map((moveKey) => (
+                      <td
+                        className="p-2"
+                        key={`move-${move.command}-key-${moveKey}`}
+                      >
+                        {move[moveKey]}
+                      </td>
+                    ))}
                     {/* I think I got blocked from gfycat cos of this line <td>{move.gif && <img src={move.gif} /> }</td> */}
                   </tr>
                 );
