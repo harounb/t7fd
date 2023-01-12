@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { GetServerSideProps } from 'next';
 import Head from "next/head";
 import Image from "next/image";
@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import Link from 'next/link'
 import { Source_Code_Pro } from "@next/font/google";
 import SearchIcon from "../../../component/icons/search";
+import useDebounce from "../../../hook/useDebounce";
 const sourceCodePro = Source_Code_Pro({ subsets: ["latin"] });
 
 type RawGithubMove = {
@@ -137,8 +138,6 @@ const characters = [
 "zafina"
 ];
 
-const jsonFile = characters.map(character => `mokujin/json/${character}.json`)
-
 const columnDisplayNamesById = {
   alias: "Alias",
   blockFrame: "Block frame",
@@ -174,11 +173,12 @@ export default function Home({ data }: { data: Move[] }) {
   const [displayedColumns, setDisplayedColumns] = useState(
     initialDisplayedColumns
   );
-  const { query: {search, character: selectedCharacter}, push } = useRouter();
-
+  const { query, push } = useRouter();
+  const [searchQuery, setSearchQuery] = useState(query.search);
+  const debouncedSearchQuery = useDebounce(searchQuery);
   const searchFilteredMoves =
-    typeof search === "string"
-      ? data.filter((move) => move.command.startsWith(search))
+    typeof debouncedSearchQuery === "string"
+      ? data.filter((move) => move.command.startsWith(debouncedSearchQuery))
       : data;
 
   const createHandleChange = (columnKey: keyof Move) => () => {
@@ -209,6 +209,24 @@ export default function Home({ data }: { data: Move[] }) {
     );
   };
 
+  useEffect(() => {
+    push({query: {search: debouncedSearchQuery, ...query}});
+  }, [debouncedSearchQuery])
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const {search} = Object.fromEntries(formDataToURLSearchParams(
+      new FormData(event.currentTarget)
+    ));
+    
+    setSearchQuery(search)
+  };
+
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value)
+  }
+
   return (
     <>
       <Head>
@@ -224,17 +242,12 @@ export default function Home({ data }: { data: Move[] }) {
           <h1 className="text-3xl pb-2 font-bold">
             Tekken 7 <br /> Frame Data
           </h1>
-          <h2 className="text-2xl pb-8">{selectedCharacter}</h2>
+          <h2 className="text-2xl pb-8">{query.selectedCharacter}</h2>
           <form
+          className="pb-4 flex"
             role="search"
             method="get"
-            onSubmit={(event: FormEvent<HTMLFormElement>) => {
-              event.preventDefault();
-              const params = formDataToURLSearchParams(
-                new FormData(event.currentTarget)
-              );
-              push({query: {...Object.fromEntries(params), character: selectedCharacter}});
-            }}
+            onSubmit={handleSearchSubmit}
           >
             <label htmlFor="header-search">
               <span className="sr-only">Search</span>
@@ -245,9 +258,11 @@ export default function Home({ data }: { data: Move[] }) {
               type="text"
               id="header-search"
               name="search"
+              value={searchQuery}
+              onChange={handleSearchChange}
             />
 
-            <button type="submit">
+            <button className="pl-2 border border-gray-600 pointer" type="submit">
               <span className="sr-only">Submit Search</span>
               <SearchIcon />
             </button>
