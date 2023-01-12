@@ -1,8 +1,8 @@
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
-import { GetStaticProps } from 'next';
+import { GetStaticProps } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import Link from 'next/link'
+import Link from "next/link";
 import { Source_Code_Pro } from "@next/font/google";
 import SearchIcon from "../../../component/icons/search";
 import useDebounce from "../../../hook/useDebounce";
@@ -47,27 +47,35 @@ const rawGithubMoveToMove = (rawGithubMove: RawGithubMove): Move => ({
   tags: rawGithubMove.Tags,
 });
 
-const jsonBaseUrl = "https://raw.githubusercontent.com/harounb/mokujin/master/json/";
+const jsonBaseUrl =
+  "https://raw.githubusercontent.com/harounb/mokujin/master/json/";
 
-export const getStaticProps: GetStaticProps<{[key: string]: any}, {[key: string]: any}> = async (context) => {
+export const getStaticProps: GetStaticProps<
+  { [key: string]: any },
+  { [key: string]: any }
+> = async (context) => {
   const { params } = context;
 
-  if(params === undefined) {
-    return {props: {}};
+  if (params === undefined) {
+    return { props: {} };
   }
 
-  
   const { character } = params;
-  const jsonRes =  await (fetch(`${jsonBaseUrl}/${character !== 'generic' ? character : '!generic'}.json`));
+  const jsonRes = await fetch(
+    `${jsonBaseUrl}/${character !== "generic" ? character : "!generic"}.json`
+  );
   const data: RawGithubMove[] = await jsonRes.json();
 
   // Pass data to the page via props
   return {
     props: { data: JSON.parse(JSON.stringify(data.map(rawGithubMoveToMove))) },
   };
-}
+};
 
-export const getStaticPaths = () => ({fallback: false, paths: characters.map((character) => ({params: {character}}))})
+export const getStaticPaths = () => ({
+  fallback: false,
+  paths: characters.map((character) => ({ params: { character } })),
+});
 
 const orderedColumns = [
   "command",
@@ -76,61 +84,61 @@ const orderedColumns = [
   "startUpFrame",
   "blockFrame",
   "hitFrame",
-  "notes"
+  "notes",
 ];
 
 const characters = [
-"generic",
-"akuma",
-"alisa",
-"anna",
-"armor_king",
-"asuka",
-"bob",
-"bryan",
-"claudio",
-"devil_jin",
-"dragunov",
-"eddy",
-"eliza",
-"fahkumram",
-"feng",
-"ganryu",
-"geese",
-"gigas",
-"heihachi",
-"hwoarang",
-"jack7",
-"jin",
-"josie",
-"julia",
-"katarina",
-"kazumi",
-"kazuya",
-"king",
-"kuma",
-"kunimitsu",
-"lars",
-"law",
-"lee",
-"lei",
-"leo",
-"leroy",
-"lidia",
-"lili",
-"lucky_chloe",
-"marduk",
-"master_raven",
-"miguel",
-"negan",
-"nina",
-"noctis",
-"paul",
-"shaheen",
-"steve",
-"xiaoyu",
-"yoshimitsu",
-"zafina"
+  "generic",
+  "akuma",
+  "alisa",
+  "anna",
+  "armor_king",
+  "asuka",
+  "bob",
+  "bryan",
+  "claudio",
+  "devil_jin",
+  "dragunov",
+  "eddy",
+  "eliza",
+  "fahkumram",
+  "feng",
+  "ganryu",
+  "geese",
+  "gigas",
+  "heihachi",
+  "hwoarang",
+  "jack7",
+  "jin",
+  "josie",
+  "julia",
+  "katarina",
+  "kazumi",
+  "kazuya",
+  "king",
+  "kuma",
+  "kunimitsu",
+  "lars",
+  "law",
+  "lee",
+  "lei",
+  "leo",
+  "leroy",
+  "lidia",
+  "lili",
+  "lucky_chloe",
+  "marduk",
+  "master_raven",
+  "miguel",
+  "negan",
+  "nina",
+  "noctis",
+  "paul",
+  "shaheen",
+  "steve",
+  "xiaoyu",
+  "yoshimitsu",
+  "zafina",
 ];
 
 const columnDisplayNamesById = {
@@ -150,7 +158,7 @@ const initialDisplayedColumns = [
   "command",
   "startUpFrame",
   "blockFrame",
-  "hitFrame"
+  "hitFrame",
 ];
 
 const formDataToURLSearchParams = (formData: FormData): URLSearchParams =>
@@ -195,7 +203,9 @@ export default function Home({ data }: { data: Move[] }) {
   const isColumnKey = (key: string): key is keyof Move => {
     return orderedColumns.some((columnKey) => columnKey === key);
   };
-  const columnIsDisplayed = (column: string): column is keyof Move & boolean => {
+  const columnIsDisplayed = (
+    column: string
+  ): column is keyof Move & boolean => {
     if (!isColumnKey(column)) {
       return false;
     }
@@ -205,22 +215,22 @@ export default function Home({ data }: { data: Move[] }) {
   };
 
   useEffect(() => {
-    push({query: {search: debouncedSearchQuery, ...query}});
-  }, [debouncedSearchQuery])
+    push({ query: { search: debouncedSearchQuery, ...query } });
+  }, [debouncedSearchQuery]);
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const {search} = Object.fromEntries(formDataToURLSearchParams(
-      new FormData(event.currentTarget)
-    ));
-    
-    setSearchQuery(search)
+    const { search } = Object.fromEntries(
+      formDataToURLSearchParams(new FormData(event.currentTarget))
+    );
+
+    setSearchQuery(search);
   };
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value)
-  }
+    setSearchQuery(event.target.value);
+  };
 
   return (
     <>
@@ -230,16 +240,14 @@ export default function Home({ data }: { data: Move[] }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div
-        className="font-mono min-h-screen flex text-stone-50 bg-gray-800"
-      >
+      <div className="font-mono min-h-screen flex text-stone-50 bg-gray-800">
         <aside className="max-h-screen overflow-scroll w-80 p-4 shrink-0">
           <h1 className="text-3xl pb-2 font-bold">
             Tekken 7 <br /> Frame Data
           </h1>
-          <h2 className="text-2xl pb-8">{query.selectedCharacter}</h2>
+          <h2 className="text-2xl pb-8">{query.character}</h2>
           <form
-          className="pb-4 flex"
+            className="pb-4 flex"
             role="search"
             method="get"
             onSubmit={handleSearchSubmit}
@@ -282,11 +290,16 @@ export default function Home({ data }: { data: Move[] }) {
           <section>
             <span className="font-bold text-lg pb-1">Characters</span>
             <ul>
-              {characters.map((character) => 
+              {characters.map((character) => (
                 <li key={character}>
-                  <Link  className="underline hover:text-gray-300" href={`/t7/fd/${character}`}>{character}</Link>
+                  <Link
+                    className="underline hover:text-gray-300"
+                    href={`/t7/fd/${character}`}
+                  >
+                    {character}
+                  </Link>
                 </li>
-              )}
+              ))}
             </ul>
           </section>
         </aside>
@@ -310,14 +323,16 @@ export default function Home({ data }: { data: Move[] }) {
                     } hover:bg-gray-400`}
                     key={JSON.stringify(move)}
                   >
-                    {orderedColumns.filter(columnIsDisplayed).map((displayedColumn) => (
-                      <td
-                        className="text-left p-2"
-                        key={`move-${move.command}-key-${displayedColumn}`}
-                      >
-                        {move[displayedColumn]}
-                      </td>
-                    ))}
+                    {orderedColumns
+                      .filter(columnIsDisplayed)
+                      .map((displayedColumn) => (
+                        <td
+                          className="text-left p-2"
+                          key={`move-${move.command}-key-${displayedColumn}`}
+                        >
+                          {move[displayedColumn]}
+                        </td>
+                      ))}
                     {/* I think I got blocked from gfycat cos of this line <td>{move.gif && <img src={move.gif} /> }</td> */}
                   </tr>
                 );
