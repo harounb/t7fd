@@ -51,7 +51,7 @@ const rawGithubMoveToMove = (rawGithubMove: RawGithubMove): Move => ({
 const jsonBaseUrl = "https://raw.githubusercontent.com/harounb/mokujin/master/json/";
 
 export const getStaticProps: GetStaticProps<{[key: string]: any}, {[key: string]: any}> = async (context) => {
-  const {params } = context;
+  const { params } = context;
 
   if(params === undefined) {
     return {props: {}};
@@ -59,7 +59,7 @@ export const getStaticProps: GetStaticProps<{[key: string]: any}, {[key: string]
 
   
   const { character } = params;
-  const jsonRes =  await (fetch(`${jsonBaseUrl}/${character}.json`));
+  const jsonRes =  await (fetch(`${jsonBaseUrl}/${character !== 'generic' ? character : '!generic'}.json`));
   const data: RawGithubMove[] = await jsonRes.json();
 
   // Pass data to the page via props
@@ -81,7 +81,7 @@ const orderedColumns = [
 ];
 
 const characters = [
-"%21generic",
+"generic",
 "akuma",
 "alisa",
 "anna",
