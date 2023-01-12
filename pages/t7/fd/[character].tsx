@@ -280,12 +280,12 @@ export default function Home({ data }: { data: Move[] }) {
             </ul>
           </section>
         </aside>
-        <main className="max-h-screen overflow-scroll pt-4">
+        <main className="max-h-screen overflow-scroll">
           <table>
             <thead>
-              <tr>
+              <tr className="sticky top-0 bg-gray-800 pt-4">
                 {orderedColumns.filter(columnIsDisplayed).map((column) => (
-                  <th className="p-2" key={column}>
+                  <th className="text-left p-2" key={column}>
                     {columnDisplayNamesById[column]}
                   </th>
                 ))}
@@ -302,7 +302,7 @@ export default function Home({ data }: { data: Move[] }) {
                   >
                     {orderedColumns.filter(columnIsDisplayed).map((displayedColumn) => (
                       <td
-                        className="p-2"
+                        className="text-left p-2"
                         key={`move-${move.command}-key-${displayedColumn}`}
                       >
                         {move[displayedColumn]}
