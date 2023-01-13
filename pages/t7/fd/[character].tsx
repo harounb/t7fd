@@ -229,18 +229,19 @@ export default function Home({ data }: { data: Move[] }) {
   };
 
   useEffect(() => {
-    const handler = debounce(() => {
-      const largeMatchedMediaQuery = window.matchMedia("(min-width: 768px)");
-      if (largeMatchedMediaQuery.matches) {
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const handler = debounce((e) => {
+      console.log(e);
+      if (e.matches) {
         setSidebarIsVisible(true);
       } else {
         setSidebarIsVisible(false);
       }
     });
   
-    window.addEventListener("resize", handler);
+    mediaQuery.addEventListener("change", handler);
     () => {
-      window.removeEventListener("resize", handler);
+      mediaQuery.removeEventListener("change", handler);
     };
   }, []);
 
