@@ -1,4 +1,4 @@
-import { useState, FormEvent, ChangeEvent, useEffect } from "react";
+import { useState, FormEvent, ChangeEvent, useEffect, useRef } from "react";
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -6,7 +6,7 @@ import Link from "next/link";
 import SearchIcon from "../../../component/icons/search";
 import MenuIcon from "../../../component/icons/menu";
 import XIcon from "../../../component/icons/x";
-import useDebounce from "../../../hook/useDebounce";
+import debounce from "lodash.debounce";
 
 type RawGithubMove = {
   Alias?: string[];
@@ -179,11 +179,9 @@ export default function Home({ data }: { data: Move[] }) {
   );
   const [sidebarIsVisible, setSidebarIsVisible] = useState(true);
   const { query, push } = useRouter();
-  const [searchQuery, setSearchQuery] = useState(query.search || "");
-  const debouncedSearchQuery = useDebounce(searchQuery);
   const searchFilteredMoves =
-    typeof debouncedSearchQuery === "string"
-      ? data.filter((move) => move.command.startsWith(debouncedSearchQuery))
+    typeof query.search === "string"
+      ? data.filter((move) => move.command.startsWith(query.search as string))
       : data;
 
   const createHandleChange = (columnKey: keyof Move) => () => {
@@ -216,9 +214,9 @@ export default function Home({ data }: { data: Move[] }) {
     );
   };
 
-  useEffect(() => {
-    push({ query: { ...query, search: debouncedSearchQuery } });
-  }, [debouncedSearchQuery]);
+  const debouncedPush = debounce((search) =>
+    push({ query: { ...query, search } })
+  , 500);
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -227,45 +225,60 @@ export default function Home({ data }: { data: Move[] }) {
       formDataToURLSearchParams(new FormData(event.currentTarget))
     );
 
-    setSearchQuery(search);
+    debouncedPush(search);
   };
 
   useEffect(() => {
-    const handler = () => {
+    const handler = debounce(() => {
       const largeMatchedMediaQuery = window.matchMedia("(min-width: 768px)");
-      if(largeMatchedMediaQuery.matches) {
-        setSidebarIsVisible(true)
+      if (largeMatchedMediaQuery.matches) {
+        setSidebarIsVisible(true);
       } else {
-        setSidebarIsVisible(false)
+        setSidebarIsVisible(false);
       }
-    }
-    window.addEventListener('resize', handler);
+    });
+  
+    window.addEventListener("resize", handler);
     () => {
-      window.removeEventListener('resize', handler);
-    }
-  }, [])
+      window.removeEventListener("resize", handler);
+    };
+  }, []);
+
+  const searchInputRef = useRef(null);
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
+    debouncedPush(event.target.value);
   };
 
-  console.log(
-    `query.search: ${query.search}, searchQuery: ${searchQuery}, debouncedSearchQuery: ${debouncedSearchQuery}`
-  );
   return (
     <>
       <Head>
         <title>Tekken 7 Frame Data</title>
         <meta name="description" content="Tekken 7 Frame Data" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className={`font-mono min-h-screen max-h-screen flex ${sidebarIsVisible ? `flex-row` : `flex-col`} text-stone-50 bg-gray-800`}>
-        <header className={`${sidebarIsVisible ? 'hidden' : ''} m-2 sticky top-0`}>
-          <span onClick={() => setSidebarIsVisible(true)}> <MenuIcon /></span>
+      <div
+        className={`font-mono min-h-screen max-h-screen flex ${
+          sidebarIsVisible ? `flex-row` : `flex-col`
+        } text-stone-50 bg-gray-800`}
+      >
+        <header
+          className={`${sidebarIsVisible ? "hidden" : ""} m-2 sticky top-0`}
+        >
+          <span onClick={() => setSidebarIsVisible(true)}>
+            <MenuIcon />
+          </span>
         </header>
-        <aside className={`${sidebarIsVisible ? '' : 'hidden'} max-h-screen absolute md:relative z-10 overflow-scroll w-80 p-4 shrink-0 bg-gray-800`}>
-          <span className="absolute top-0 right-0 p-3" onClick={() => setSidebarIsVisible(false)}>
+        <aside
+          className={`${
+            sidebarIsVisible ? "" : "hidden"
+          } max-h-screen absolute md:relative z-10 overflow-scroll w-80 p-4 shrink-0 bg-gray-800`}
+        >
+          <span
+            className={`md:hidden absolute top-0 right-0 p-3`}
+            onClick={() => setSidebarIsVisible(false)}
+          >
             <XIcon />
           </span>
           <h1 className="text-3xl pb-2 font-bold">
@@ -287,8 +300,9 @@ export default function Home({ data }: { data: Move[] }) {
               type="text"
               id="header-search"
               name="search"
-              value={searchQuery}
+              defaultValue={query.search}
               onChange={handleSearchChange}
+              ref={searchInputRef}
             />
 
             <button className="pl-2 pointer" type="submit">
