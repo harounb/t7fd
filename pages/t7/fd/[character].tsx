@@ -1,17 +1,17 @@
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import MenuIcon from "../../../component/icons/menu";
-import MoveSearch from "../../../component/move-search";
-import CharactersNav, { CHARACTERS } from "../../../component/characters-nav";
+import MenuIcon from "../../../components/icons/menu";
+import MoveSearch from "../../../components/move-search";
+import CharactersNav, { CHARACTERS } from "../../../components/characters-nav";
 import ColumnSelect, {
   columnIsDisplayed,
   COLUMN_DISPLAY_NAMES,
   Move,
   ORDERED_COLUMNS,
   useColumns,
-} from "../../../component/column-select";
-import Sidebar, { useSidebar } from "../../../component/sidebar";
+} from "../../../components/column-select";
+import Sidebar, { useSidebar } from "../../../components/sidebar";
 
 type RawGithubMove = {
   Alias?: string[];
@@ -81,7 +81,7 @@ export default function Home({ data }: { data: Move[] }) {
   return (
     <>
       <Head>
-        <title>Tekken 7 Frame Data - {query.character}</title>
+        <title>{`Tekken 7 Frame Data - ${query.character?.toString()}`}</title>
         <meta name="description" content="Tekken 7 Frame Data" />
         <meta
           name="viewport"

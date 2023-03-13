@@ -1,11 +1,11 @@
 import Head from "next/head";
-import MenuIcon from "../../../../component/icons/menu";
-import MoveSearch from "../../../../component/move-search";
+import MenuIcon from "../../../../components/icons/menu";
+import MoveSearch from "../../../../components/move-search";
 import CharactersNav, {
   CHARACTERS,
-} from "../../../../component/characters-nav";
-import ColumnSelect, { useColumns } from "../../../../component/column-select";
-import Sidebar, { useSidebar } from "../../../../component/sidebar";
+} from "../../../../components/characters-nav";
+import ColumnSelect, { useColumns } from "../../../../components/column-select";
+import Sidebar, { useSidebar } from "../../../../components/sidebar";
 
 export default function About() {
   const { displayedColumns, setDisplayedColumns } = useColumns();
