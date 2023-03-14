@@ -1,17 +1,18 @@
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import MenuIcon from "../../../components/icons/menu";
-import MoveSearch from "../../../components/move-search";
-import CharactersNav, { CHARACTERS } from "../../../components/characters-nav";
+import MenuIcon from "../../components/icons/menu";
+import MoveSearch from "../../components/move-search";
+import CharactersNav, { CHARACTERS, CHARACTER_DISPLAY_NAME, isCharacter } from "../../components/characters-nav";
 import ColumnSelect, {
   columnIsDisplayed,
   COLUMN_DISPLAY_NAMES,
   Move,
   ORDERED_COLUMNS,
   useColumns,
-} from "../../../components/column-select";
-import Sidebar, { useSidebar } from "../../../components/sidebar";
+} from "../../components/column-select";
+import Sidebar, { useSidebar } from "../../components/sidebar";
+import NavLink from "../../components/navlink";
 
 type RawGithubMove = {
   Alias?: string[];
@@ -78,10 +79,11 @@ export default function Home({ data }: { data: Move[] }) {
       ? data.filter((move) => move.command.startsWith(query.search as string))
       : data;
 
+  const character = typeof query.character === "string" && isCharacter(query.character) ? query.character : "generic";
   return (
     <>
       <Head>
-        <title>{`Tekken 7 Frame Data - ${query.character?.toString()}`}</title>
+        <title>{`Tekken 7 Frame Data - ${CHARACTER_DISPLAY_NAME[character]}`}</title>
         <meta name="description" content="Tekken 7 Frame Data" />
         <meta
           name="viewport"
@@ -100,14 +102,14 @@ export default function Home({ data }: { data: Move[] }) {
           } m-2 sticky top-0`}
         >
           <span onClick={() => sidebarState.setSidebarIsVisible(true)}>
-            <MenuIcon />
+            <MenuIcon className="h-8 w-8" />
           </span>
         </header>
         <Sidebar state={sidebarState}>
-          <h1 className="text-3xl pb-2 font-bold">
-            Tekken 7 <br /> Frame Data
+        <h1 className="text-3xl pb-2 font-bold">
+           <NavLink href="/"> Tekken 7 <br /> Frame Data</NavLink>
           </h1>
-          <h2 className="text-2xl pb-8">{query.character}</h2>
+          <h2 className="text-2xl pb-8">{CHARACTER_DISPLAY_NAME[character]}</h2>
           <MoveSearch />
           <ColumnSelect
             displayedColumns={displayedColumns}

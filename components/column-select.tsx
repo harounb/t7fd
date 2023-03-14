@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import ChevronUp from "./icons/chevron-up";
+import ChevronDown from "./icons/chevron-down";
 
 const INITIAL_DISPLAYED_COLUMNS = [
   "command",
@@ -88,9 +90,13 @@ export default function ColumnSelect({
       onDisplayedColumnsChange([...displayedColumns, columnKey]);
     }
   };
+
+  const [collapsed, setCollapsed] = useState(false);
+  const Arrow = collapsed ? ChevronDown : ChevronUp;
   return (
     <fieldset className="pb-4">
-      <legend className="font-bold text-lg pb-1">Columns</legend>
+      <legend className="font-bold text-lg pb-1 w-full"><button className="w-full flex items-center justify-between" onClick={() => setCollapsed(!collapsed)}>Columns <Arrow className="w-4 h-4" /></button></legend>
+      <div className={collapsed ? 'hidden' : 'pl-4'}>
       {ORDERED_COLUMNS.filter(isColumnKey).map((column) => (
         <div key={column}>
           <input
@@ -105,6 +111,7 @@ export default function ColumnSelect({
           </label>
         </div>
       ))}
+      </div>
     </fieldset>
   );
 }
