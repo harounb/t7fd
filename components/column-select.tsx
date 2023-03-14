@@ -7,6 +7,7 @@ const INITIAL_DISPLAYED_COLUMNS = [
   "startUpFrame",
   "blockFrame",
   "hitFrame",
+  "counterHitFrame"
 ] satisfies (keyof Move)[];
 
 export type Move = {
@@ -16,6 +17,7 @@ export type Move = {
   damage: string;
   gif: string;
   hitFrame: string;
+  counterHitFrame: string;
   hitLevel: string;
   notes: string;
   startUpFrame: string;
@@ -29,6 +31,7 @@ export const ORDERED_COLUMNS = [
   "startUpFrame",
   "blockFrame",
   "hitFrame",
+  "counterHitFrame",
   "notes",
 ] as const;
 
@@ -62,6 +65,7 @@ export const COLUMN_DISPLAY_NAMES = {
   damage: "Damage",
   gif: "Gif",
   hitFrame: "Hit frame",
+  counterHitFrame: "Counter hit frame",
   hitLevel: "Hit level",
   notes: "Notes",
   startUpFrame: "Start up",

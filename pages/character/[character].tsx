@@ -35,6 +35,7 @@ const rawGithubMoveToMove = (rawGithubMove: RawGithubMove): Move => ({
   damage: rawGithubMove.Damage,
   gif: rawGithubMove.Gif,
   hitFrame: rawGithubMove["Hit frame"],
+  counterHitFrame: rawGithubMove["Counter hit frame"],
   hitLevel: rawGithubMove["Hit level"],
   notes: rawGithubMove.Notes,
   startUpFrame: rawGithubMove["Start up frame"],
